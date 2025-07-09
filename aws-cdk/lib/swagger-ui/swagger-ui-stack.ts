@@ -12,7 +12,7 @@ export class SwaggerUIStack extends cdk.Stack {
     // S3 Bucket
 
     const bucket = new s3.Bucket(this, "SwaggerUIBucket", {
-      bucketName: "aws-codebuild-test-swagger-hosting-bucket",
+      bucketName: "fastify-api-templete-swagger-hosting-bucket",
       websiteIndexDocument: "index.html",
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
