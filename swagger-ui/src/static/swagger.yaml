@@ -3,3 +3,409 @@ openapi: 3.0.3
 info:
   title: fastify-api-templete
   version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: ローカル環境
+
+tags:
+  - name: authentication
+    description: 認証
+  - name: contact
+    description: 問い合わせ
+
+paths:
+  /authentication/token:
+    post:
+      summary: アクセストークン発行API
+      operationId: post-authentication-token
+      security: []
+      tags:
+        - authentication
+      description: |
+        API にアクセスするためのアクセストークンを発行する。
+
+        アカウントの作成はシステム管理者が行う想定のため、ユーザー登録用のエンドポイントは提供していない。
+
+        発行されたアクセストークンは、他の API 呼び出し時に Authorization ヘッダーへ Bearer トークンとして設定する。
+
+        アクセストークンには有効期限があるため、期限切れの場合は API がエラーを返す。その場合は 新しいアクセストークンを再発行して使用する必要がある。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAuthenticationToken"
+      responses:
+        "201":
+          description: アクセストークンの発行に成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationToken"
+    put:
+      summary: アクセストークン更新API
+      operationId: put-authentication-token
+      security: []
+      tags:
+        - authentication
+      description: |
+        リフレッシュトークンを使用して、新しいアクセストークンを発行する。
+
+        アクセストークンは有効期限付きのため、期限切れ時に本エンドポイントで再発行を行う。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAuthenticationToken"
+      responses:
+        "200":
+          description: アクセストークンの更新に成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationToken"
+  /contacts:
+    post:
+      tags:
+        - contact
+      summary: 問い合わせ作成 API
+      operationId: post-contract
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContract"
+        required: true
+      responses:
+        "201":
+          description: 問い合わせの情報の作成に成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+        "400":
+          description: リクエストボディが不正
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: リクエストボディが不正
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      tags:
+        - contact
+      summary: 問い合わせ複数取得API
+      operationId: get-contacts
+      parameters:
+        - $ref: "#/components/parameters/queryFrom"
+        - $ref: "#/components/parameters/queryTo"
+        - $ref: "#/components/parameters/querySort"
+        - $ref: "#/components/parameters/queryLimit"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 正常に問い合わせの情報を取得できた
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contract"
+  /contacts/{contact_id}:
+    put:
+      tags:
+        - contact
+      summary: 問い合わせ更新API
+      operationId: put-contact
+      parameters:
+        - name: contact_id
+          in: path
+          required: true
+          description: 更新したい問い合わせのID
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateContract"
+        required: true
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 問い合わせの情報を正常に更新できた
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+    get:
+      tags:
+        - contact
+      summary: 問い合わせ取得API
+      operationId: get-contact
+      parameters:
+        - $ref: "#/components/parameters/pathContactId"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: 正常に問い合わせの情報を取得できた
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+    delete:
+      tags:
+        - contact
+      summary: 問い合わせ削除API
+      operationId: delete-contract
+      parameters:
+        - $ref: "#/components/parameters/pathContactId"
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: 問い合わせの情報の削除に成功した
+
+components:
+  parameters:
+    queryLimit:
+      name: limit
+      description: |
+        - 取得するデータの最大件数
+        - 未指定の場合は全データを取得する
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        example: 100
+    queryFrom:
+      name: from
+      description: |
+        - `timestamp` プロパティがこの `from` 以降のデータを取得する
+        - 未指定の場合は timestamp 値の下限を設けない
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+        example: 2024-01-01T15:00:00.000Z
+    queryTo:
+      name: to
+      description: |
+        - `timestamp` プロパティがこの `to` 以前のデータを取得する
+        - 未指定の場合は timestamp 値の上限を設けない
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+        example: 2025-01-01T15:00:00.000Z
+    querySort:
+      name: sort
+      description: |
+        - レスポンスとして`timestamp`プロパティをこの`sort`パラメータによりソートして返す
+        - `limit` パラメータの作用にも影響する
+        - 未指定の場合は、降順でソートする
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: desc
+        example: desc
+    pathContactId:
+      name: contact_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 550e8400-e29b-41d4-a716-446655440000
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Error:
+      title: Error
+      type: object
+      description: エラーレスポンス
+      properties:
+        statusCode:
+          type: integer
+          nullable: false
+          description: |-
+            HTTP ステータスコード。
+
+            400 や 500 等のステータスコードが返される。
+        error:
+          type: string
+          nullable: false
+          minLength: 1
+          description: |-
+            `bad_request` や `internal_server_error` 等のエラーの種類を表す文字列。
+
+            `access_token_expired` の場合はアクセストークンの有効期限切れなので再度アクセストークンの発行を行うこと。
+        message:
+          type: string
+          nullable: false
+          minLength: 1
+          description: 詳細なエラー内容
+      required:
+        - statusCode
+        - error
+        - message
+    AuthenticationToken:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          nullable: false
+          example: "string"
+          description: 発行されたアクセストークン
+        refreshToken:
+          type: string
+          nullable: false
+          example: "string"
+          description: 発行されたリフレッシュトークン
+      required:
+        - accessToken
+        - refreshToken
+    CreateAuthenticationToken:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          nullable: false
+          minLength: 1
+          description: メールアドレス
+        password:
+          type: string
+          nullable: false
+          minLength: 1
+          description: パスワード
+      required:
+        - email
+        - password
+    UpdateAuthenticationToken:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          nullable: false
+          minLength: 1
+          description: リフレッシュトークン
+      required:
+        - refreshToken
+    Contract:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: false
+          minLength: 1
+          example: 550e8400-e29b-41d4-a716-446655440000
+          description: 問い合わせ ID
+        name:
+          type: string
+          nullable: false
+          minLength: 1
+          description: 名前
+          example: 山田太郎
+        email:
+          type: string
+          format: email
+          nullable: false
+          minLength: 1
+          description: メールアドレス
+        message:
+          type: string
+          nullable: false
+          minLength: 1
+          description: 問い合わせ内容
+          example: 問い合わせのテストメッセージ。
+        created_at:
+          type: string
+          format: date-time
+          nullable: false
+          minLength: 1
+          description: 作成日時
+          example: "2018-08-09T05:00:00.000Z"
+        updated_at:
+          type: string
+          format: date-time
+          nullable: false
+          minLength: 1
+          description: 更新日時
+          example: "2018-08-09T05:00:00.000Z"
+      required:
+        - id
+        - name
+        - email
+        - message
+        - createdAt
+        - updatedAt
+    UpdateContract:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: false
+          minLength: 1
+          description: 名前
+          example: 山田太郎
+        email:
+          type: string
+          format: email
+          nullable: false
+          minLength: 1
+          description: メールアドレス
+        message:
+          type: string
+          nullable: false
+          minLength: 1
+          description: 問い合わせ内容
+          example: 問い合わせのテストメッセージ。
+      required:
+        - name
+        - email
+        - message
+    CreateContract:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: false
+          minLength: 1
+          description: 名前
+          example: 山田太郎
+        email:
+          type: string
+          format: email
+          nullable: false
+          minLength: 1
+          description: メールアドレス
+        message:
+          type: string
+          nullable: false
+          minLength: 1
+          description: 問い合わせ内容
+          example: 問い合わせのテストメッセージ。
+      required:
+        - name
+        - email
+        - message
