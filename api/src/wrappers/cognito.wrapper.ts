@@ -1,0 +1,78 @@
+import { CognitoJwtVerifier } from "aws-jwt-verify";
+
+import {
+  AdminInitiateAuthCommand,
+  AdminInitiateAuthCommandInput,
+  AdminInitiateAuthCommandOutput,
+  CognitoIdentityProviderClient,
+} from "@aws-sdk/client-cognito-identity-provider";
+
+import { CognitoAccessTokenPayload } from "aws-jwt-verify/jwt-model";
+
+interface ICognitoWrapper {
+  createToken(
+    email: string,
+    password: string,
+  ): Promise<AdminInitiateAuthCommandOutput>;
+  verifyToken(accessToken: string): Promise<CognitoAccessTokenPayload>;
+  refreshToken(refreshToken: string): Promise<AdminInitiateAuthCommandOutput>;
+}
+
+class CognitoWrapper implements ICognitoWrapper {
+  private client: CognitoIdentityProviderClient;
+  private userPoolId: string;
+  private clientId: string;
+
+  constructor() {
+    this.client = new CognitoIdentityProviderClient();
+    this.userPoolId = process.env.COGNITO_USER_POOL_ID!;
+    this.clientId = process.env.COGNITO_CLIENT_ID!;
+  }
+
+  async createToken(
+    email: string,
+    password: string,
+  ): Promise<AdminInitiateAuthCommandOutput> {
+    const input: AdminInitiateAuthCommandInput = {
+      AuthFlow: "ADMIN_USER_PASSWORD_AUTH",
+      UserPoolId: this.userPoolId,
+      ClientId: this.clientId,
+      AuthParameters: {
+        USERNAME: email,
+        PASSWORD: password,
+      },
+    };
+    const command = new AdminInitiateAuthCommand(input);
+    const result = await this.client.send(command);
+    return result;
+  }
+
+  async verifyToken(accessToken: string): Promise<CognitoAccessTokenPayload> {
+    const accessTokenVerifier = CognitoJwtVerifier.create({
+      userPoolId: this.userPoolId,
+      clientId: this.clientId,
+      tokenUse: "access",
+    });
+    const result = await accessTokenVerifier.verify(accessToken);
+    return result;
+  }
+
+  async refreshToken(
+    refreshToken: string,
+  ): Promise<AdminInitiateAuthCommandOutput> {
+    const input: AdminInitiateAuthCommandInput = {
+      AuthFlow: "REFRESH_TOKEN_AUTH",
+      UserPoolId: this.userPoolId,
+      ClientId: this.clientId,
+      AuthParameters: {
+        REFRESH_TOKEN: refreshToken,
+      },
+    };
+    const command = new AdminInitiateAuthCommand(input);
+    const result = await this.client.send(command);
+    return result;
+  }
+}
+
+export { CognitoWrapper };
+export type { ICognitoWrapper };
