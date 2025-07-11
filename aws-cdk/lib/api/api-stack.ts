@@ -3,7 +3,6 @@ import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as ssm from "aws-cdk-lib/aws-ssm";
 import { Construct } from "constructs";
 import * as path from "path";
 
@@ -13,10 +12,10 @@ export class ApiStack extends cdk.Stack {
 
     // SSM Parameter Store
 
-    const env = ssm.StringParameter.valueForStringParameter(
-      this,
-      "/codebuild-test/env",
-    );
+    // const env = ssm.StringParameter.valueForStringParameter(
+    //   this,
+    //   "/fastify-api-templete/env",
+    // );
 
     // Lambda Function
 
@@ -24,7 +23,7 @@ export class ApiStack extends cdk.Stack {
       this,
       "DockerImageLambdaTest",
       {
-        functionName: "aws-codebuild-test-lambda",
+        functionName: "fastify-api-templete-lambda",
         architecture: lambda.Architecture.ARM_64,
         code: lambda.DockerImageCode.fromImageAsset(
           path.resolve(__dirname, "../../.."),
@@ -32,16 +31,16 @@ export class ApiStack extends cdk.Stack {
             file: "api/Dockerfile",
           },
         ),
-        environment: {
-          ENV: env,
-        },
+        // environment: {
+        //   ENV: env,
+        // },
       },
     );
 
     // API Gateway
 
     const api = new apigateway.RestApi(this, "ApiGateway", {
-      restApiName: "aws-codebuild-test-api",
+      restApiName: "fastify-api-templete-api",
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
@@ -52,7 +51,7 @@ export class ApiStack extends cdk.Stack {
 
     // Rate Limiting and Quota
     api.addUsagePlan("ApiGatewayAnonymousUsagePlan", {
-      name: "aws-codebuild-test-api-anonymous-access",
+      name: "fastify-api-templete-api-anonymous-access",
       throttle: {
         rateLimit: 20, // 平均5req/sec
         burstLimit: 10, // 一時的に10まで
@@ -126,7 +125,7 @@ export class ApiStack extends cdk.Stack {
     // DynamoDB
 
     const table = new dynamodb.Table(this, "ContactTable", {
-      tableName: `aws-codebuild-test-contact-table`,
+      tableName: `fastify-api-templete-contact-table`,
       partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
@@ -135,7 +134,7 @@ export class ApiStack extends cdk.Stack {
     // Cognito
 
     const userPool = new cognito.UserPool(this, "UserPool", {
-      userPoolName: `aws-codebuild-test-user-pool`,
+      userPoolName: `fastify-api-templete-user-pool`,
       signInAliases: { email: true },
       selfSignUpEnabled: true,
       passwordPolicy: {
@@ -145,7 +144,7 @@ export class ApiStack extends cdk.Stack {
     });
 
     const cognitoClient = new cognito.UserPoolClient(this, "AppClient", {
-      userPoolClientName: `aws-codebuild-test-user-pool-client`,
+      userPoolClientName: `fastify-api-templete-user-pool-client`,
       userPool,
       generateSecret: false,
       authFlows: {
