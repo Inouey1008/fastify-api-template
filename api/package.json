@@ -1,0 +1,40 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "rm -rf dist && npm run typecheck && npm run esbuild",
+    "build:watch": "rm -rf dist && concurrently -n TSC,ESBUILD -c yellow,cyan \"npm run typecheck:watch\" \"npm run esbuild:watch\"",
+    "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch --preserveWatchOutput",
+    "esbuild": "node esbuild.config.mjs",
+    "esbuild:watch": "node esbuild.config.mjs --watch",
+    "start": "npm run build && node --enable-source-maps dist/index.js",
+    "dev": "concurrently -n ESBUILD,APP -c yellow,cyan \"npm run esbuild:watch\" \"wait-on dist/index.js && nodemon --enable-source-maps dist/index.js\"",
+    "lint": "eslint --ext .ts ./src",
+    "format": "prettier --check ./src",
+    "format:fix": "prettier --write ./src"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.787.0",
+    "@aws-sdk/client-dynamodb": "^3.782.0",
+    "@aws-sdk/lib-dynamodb": "^3.782.0",
+    "@fastify/autoload": "^6.3.0",
+    "@fastify/sensible": "^6.0.3",
+    "@fastify/type-provider-json-schema-to-ts": "^5.0.0",
+    "aws-jwt-verify": "^5.0.0",
+    "dotenv": "^16.5.0",
+    "fastify": "^5.2.2",
+    "json-schema-to-ts": "^3.1.1",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "esbuild": "^0.25.2",
+    "nodemon": "^3.1.9",
+    "wait-on": "^8.0.3"
+  }
+}

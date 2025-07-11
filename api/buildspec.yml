@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 22
+    commands:
+      - cd $CODEBUILD_SRC_DIR
+      - npm ci
+      - cd $CODEBUILD_SRC_DIR/aws-cdk
+      - npm ci
+
+  pre_build:
+    commands:
+      - cd $CODEBUILD_SRC_DIR/api
+      - npm run lint
+      - cd $CODEBUILD_SRC_DIR/aws-cdk
+      - npx cdk bootstrap
+
+  build:
+    commands:
+      - npx cdk synth AwsCodeBuildTestApp
+
+  post_build:
+    commands:
+      - npx cdk deploy AwsCodeBuildTestApp --require-approval never
