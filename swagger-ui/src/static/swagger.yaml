@@ -320,6 +320,13 @@ components:
           minLength: 1
           example: 550e8400-e29b-41d4-a716-446655440000
           description: 問い合わせ ID
+        timestamp:
+          type: string
+          format: date-time
+          nullable: false
+          minLength: 1
+          description: 問い合わせのタイムスタンプ
+          example: "2018-08-09T05:00:00.000Z"
         name:
           type: string
           nullable: false
@@ -338,14 +345,14 @@ components:
           minLength: 1
           description: 問い合わせ内容
           example: 問い合わせのテストメッセージ。
-        created_at:
+        createdAt:
           type: string
           format: date-time
           nullable: false
           minLength: 1
           description: 作成日時
           example: "2018-08-09T05:00:00.000Z"
-        updated_at:
+        updatedAt:
           type: string
           format: date-time
           nullable: false
@@ -354,6 +361,7 @@ components:
           example: "2018-08-09T05:00:00.000Z"
       required:
         - id
+        - timestamp
         - name
         - email
         - message
