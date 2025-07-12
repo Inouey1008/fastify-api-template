@@ -6,21 +6,21 @@ phases:
       nodejs: 22
     commands:
       - cd $CODEBUILD_SRC_DIR
-      - npm ci
-      - cd $CODEBUILD_SRC_DIR/aws-cdk
+      - pwd
       - npm ci
 
   pre_build:
     commands:
       - cd $CODEBUILD_SRC_DIR/api
+      - pwd
       - npm run lint
       - cd $CODEBUILD_SRC_DIR/aws-cdk
       - npx cdk bootstrap
 
   build:
     commands:
-      - npx cdk synth AwsCodeBuildTestApp
+      - npx cdk synth FastifyApiTempleteApi
 
   post_build:
     commands:
-      - npx cdk deploy AwsCodeBuildTestApp --require-approval never
+      - npx cdk deploy FastifyApiTempleteApi --require-approval never
