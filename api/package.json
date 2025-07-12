@@ -12,7 +12,7 @@
     "esbuild:watch": "node esbuild.config.mjs --watch",
     "start": "npm run build && node --enable-source-maps dist/index.js",
     "dev": "concurrently -n ESBUILD,APP -c yellow,cyan \"npm run esbuild:watch\" \"wait-on dist/index.js && nodemon --enable-source-maps dist/index.js\"",
-    "lint": "eslint --ext .ts ./src",
+    "lint": "eslint --config ../eslint.config.js --ext .ts ./src",
     "format": "prettier --check ./src",
     "format:fix": "prettier --write ./src"
   },
