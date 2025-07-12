@@ -33,7 +33,7 @@ export const updateAuthenticationTokenSchema = {
 export const authenticationTokenSchema = {
   type: "object",
   properties: {
-    accessToken: {
+    idToken: {
       type: "string",
       minLength: 1,
       nullable: false,
@@ -44,7 +44,7 @@ export const authenticationTokenSchema = {
       nullable: false,
     },
   },
-  required: ["accessToken", "refreshToken"],
+  required: ["idToken", "refreshToken"],
 } as const;
 
 export type CreateAuthenticationTokenDTO = FromSchema<

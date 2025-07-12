@@ -17,19 +17,19 @@ tags:
 paths:
   /authentication/token:
     post:
-      summary: アクセストークン発行API
+      summary: IDトークン発行API
       operationId: post-authentication-token
       security: []
       tags:
         - authentication
       description: |
-        API にアクセスするためのアクセストークンを発行する。
+        API にアクセスするためのIDトークンを発行する。
 
         アカウントの作成はシステム管理者が行う想定のため、ユーザー登録用のエンドポイントは提供していない。
 
-        発行されたアクセストークンは、他の API 呼び出し時に Authorization ヘッダーへ Bearer トークンとして設定する。
+        発行されたIDトークンは、他の API 呼び出し時に Authorization ヘッダーへ Bearer トークンとして設定する。
 
-        アクセストークンには有効期限があるため、期限切れの場合は API がエラーを返す。その場合は 新しいアクセストークンを再発行して使用する必要がある。
+        IDトークンには有効期限があるため、期限切れの場合は API がエラーを返す。その場合は 新しいIDトークンを再発行して使用する必要がある。
       requestBody:
         required: true
         content:
@@ -38,21 +38,21 @@ paths:
               $ref: "#/components/schemas/CreateAuthenticationToken"
       responses:
         "201":
-          description: アクセストークンの発行に成功
+          description: IDトークンの発行に成功
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthenticationToken"
     put:
-      summary: アクセストークン更新API
+      summary: IDトークン更新API
       operationId: put-authentication-token
       security: []
       tags:
         - authentication
       description: |
-        リフレッシュトークンを使用して、新しいアクセストークンを発行する。
+        リフレッシュトークンを使用して、新しいIDトークンを発行する。
 
-        アクセストークンは有効期限付きのため、期限切れ時に本エンドポイントで再発行を行う。
+        IDトークンは有効期限付きのため、期限切れ時に本エンドポイントで再発行を行う。
       requestBody:
         required: true
         content:
@@ -61,7 +61,7 @@ paths:
               $ref: "#/components/schemas/UpdateAuthenticationToken"
       responses:
         "200":
-          description: アクセストークンの更新に成功
+          description: IDトークンの更新に成功
           content:
             application/json:
               schema:
@@ -257,7 +257,7 @@ components:
           description: |-
             `bad_request` や `internal_server_error` 等のエラーの種類を表す文字列。
 
-            `access_token_expired` の場合はアクセストークンの有効期限切れなので再度アクセストークンの発行を行うこと。
+            `access_token_expired` の場合はIDトークンの有効期限切れなので再度IDトークンの発行を行うこと。
         message:
           type: string
           nullable: false
@@ -270,18 +270,18 @@ components:
     AuthenticationToken:
       type: object
       properties:
-        accessToken:
+        idToken:
           type: string
           nullable: false
           example: "string"
-          description: 発行されたアクセストークン
+          description: 発行されたIDトークン
         refreshToken:
           type: string
           nullable: false
           example: "string"
           description: 発行されたリフレッシュトークン
       required:
-        - accessToken
+        - idToken
         - refreshToken
     CreateAuthenticationToken:
       type: object

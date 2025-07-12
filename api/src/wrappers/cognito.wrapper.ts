@@ -10,14 +10,14 @@ import {
   GetTokensFromRefreshTokenCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
 
-import { CognitoAccessTokenPayload } from "aws-jwt-verify/jwt-model";
+import { CognitoIdTokenPayload } from "aws-jwt-verify/jwt-model";
 
 interface ICognitoWrapper {
   createToken(
     email: string,
     password: string,
   ): Promise<AdminInitiateAuthCommandOutput>;
-  verifyToken(accessToken: string): Promise<CognitoAccessTokenPayload>;
+  verifyToken(accessToken: string): Promise<CognitoIdTokenPayload>;
   refreshToken(
     refreshToken: string,
   ): Promise<GetTokensFromRefreshTokenCommandOutput>;
@@ -52,11 +52,11 @@ class CognitoWrapper implements ICognitoWrapper {
     return result;
   }
 
-  async verifyToken(accessToken: string): Promise<CognitoAccessTokenPayload> {
+  async verifyToken(accessToken: string): Promise<CognitoIdTokenPayload> {
     const accessTokenVerifier = CognitoJwtVerifier.create({
       userPoolId: this.userPoolId,
       clientId: this.clientId,
-      tokenUse: "access",
+      tokenUse: "id",
     });
     const result = await accessTokenVerifier.verify(accessToken);
     return result;
