@@ -33,15 +33,14 @@ export class AuthenticationController implements IAuthenticationController {
       }
 
       const authenticationResult = result.AuthenticationResult;
-      const accessToken = authenticationResult?.AccessToken;
-      const refreshToken = authenticationResult?.RefreshToken;
-      if (!accessToken || !refreshToken) {
+      const newIdToken = authenticationResult?.IdToken;
+      const newRefreshToken = authenticationResult?.RefreshToken;
+      if (!newIdToken || !newRefreshToken) {
         throw httpErrors.forbidden("No token returned");
       }
-
       const authToken: AuthenticationTokenDTO = {
-        accessToken,
-        refreshToken,
+        idToken: newIdToken,
+        refreshToken: newRefreshToken,
       };
       return authToken;
     } catch (e) {
@@ -68,13 +67,13 @@ export class AuthenticationController implements IAuthenticationController {
     try {
       const result = await this.cognito.refreshToken(refreshToken);
       const authenticationResult = result.AuthenticationResult;
-      const newAccessToken = authenticationResult?.AccessToken;
+      const newIdToken = authenticationResult?.IdToken;
       const newRefreshToken = authenticationResult?.RefreshToken;
-      if (!newAccessToken || !newRefreshToken) {
+      if (!newIdToken || !newRefreshToken) {
         throw httpErrors.forbidden("No token returned");
       }
       const authToken: AuthenticationTokenDTO = {
-        accessToken: newAccessToken,
+        idToken: newIdToken,
         refreshToken: newRefreshToken,
       };
       return authToken;

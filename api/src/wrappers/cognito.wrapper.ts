@@ -5,17 +5,22 @@ import {
   AdminInitiateAuthCommandInput,
   AdminInitiateAuthCommandOutput,
   CognitoIdentityProviderClient,
+  GetTokensFromRefreshTokenCommand,
+  GetTokensFromRefreshTokenCommandInput,
+  GetTokensFromRefreshTokenCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
 
-import { CognitoAccessTokenPayload } from "aws-jwt-verify/jwt-model";
+import { CognitoIdTokenPayload } from "aws-jwt-verify/jwt-model";
 
 interface ICognitoWrapper {
   createToken(
     email: string,
     password: string,
   ): Promise<AdminInitiateAuthCommandOutput>;
-  verifyToken(accessToken: string): Promise<CognitoAccessTokenPayload>;
-  refreshToken(refreshToken: string): Promise<AdminInitiateAuthCommandOutput>;
+  verifyToken(accessToken: string): Promise<CognitoIdTokenPayload>;
+  refreshToken(
+    refreshToken: string,
+  ): Promise<GetTokensFromRefreshTokenCommandOutput>;
 }
 
 class CognitoWrapper implements ICognitoWrapper {
@@ -47,11 +52,11 @@ class CognitoWrapper implements ICognitoWrapper {
     return result;
   }
 
-  async verifyToken(accessToken: string): Promise<CognitoAccessTokenPayload> {
+  async verifyToken(accessToken: string): Promise<CognitoIdTokenPayload> {
     const accessTokenVerifier = CognitoJwtVerifier.create({
       userPoolId: this.userPoolId,
       clientId: this.clientId,
-      tokenUse: "access",
+      tokenUse: "id",
     });
     const result = await accessTokenVerifier.verify(accessToken);
     return result;
@@ -59,16 +64,12 @@ class CognitoWrapper implements ICognitoWrapper {
 
   async refreshToken(
     refreshToken: string,
-  ): Promise<AdminInitiateAuthCommandOutput> {
-    const input: AdminInitiateAuthCommandInput = {
-      AuthFlow: "REFRESH_TOKEN_AUTH",
-      UserPoolId: this.userPoolId,
+  ): Promise<GetTokensFromRefreshTokenCommandOutput> {
+    const input: GetTokensFromRefreshTokenCommandInput = {
+      RefreshToken: refreshToken,
       ClientId: this.clientId,
-      AuthParameters: {
-        REFRESH_TOKEN: refreshToken,
-      },
     };
-    const command = new AdminInitiateAuthCommand(input);
+    const command = new GetTokensFromRefreshTokenCommand(input);
     const result = await this.client.send(command);
     return result;
   }
