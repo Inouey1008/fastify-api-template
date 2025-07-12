@@ -17,6 +17,21 @@ export class PipelineStack extends cdk.Stack {
 
     // CodeBuild Project
 
+    new CodeBuildProject(this, "ApiDeploymentProject", {
+      projectName: "fastify-api-templete-api-deployment",
+      githubUserName: "Inouey1008",
+      githubRepoName: "fastify-api-template",
+      codeconnectionArn: codeconnectionArn,
+      buildspecPath:
+        codebuild.BuildSpec.fromSourceFilename("api/buildspec.yml"),
+      triggerFilters: [
+        codebuild.FilterGroup.inEventOf(
+          codebuild.EventAction.PUSH,
+          codebuild.EventAction.PULL_REQUEST_MERGED,
+        ).andHeadRefIs("refs/heads/main"),
+      ],
+    });
+
     new CodeBuildProject(this, "SwaggerDeploymentProject", {
       projectName: "fastify-api-templete-swagger-deployment",
       githubUserName: "Inouey1008",
