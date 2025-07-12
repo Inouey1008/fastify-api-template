@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import fastify, { FastifyInstance } from "fastify";
 
 import autoLoad from "@fastify/autoload";
+import cors from "@fastify/cors";
 import { ErrorDTO } from "models/error.model";
 import { join } from "path";
 
@@ -11,6 +12,12 @@ dotenv.config();
 export const createApp = (): FastifyInstance => {
   const app = fastify({
     logger: true,
+  });
+
+  // CORS Settings
+  app.register(cors, {
+    origin: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   });
 
   // Set error handler
