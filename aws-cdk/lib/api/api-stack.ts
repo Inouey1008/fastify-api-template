@@ -127,6 +127,7 @@ export class ApiStack extends cdk.Stack {
     const table = new dynamodb.Table(this, "ContactTable", {
       tableName: `fastify-api-templete-contact-table`,
       partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "timestamp", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
     table.grantReadWriteData(lambdaFunction);
