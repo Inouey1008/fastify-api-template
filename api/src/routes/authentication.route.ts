@@ -39,14 +39,14 @@ const authenticationRoutes: FastifyPluginAsyncJsonSchemaToTs = async (
       schema: {
         body: updateAuthenticationTokenSchema,
         response: {
-          201: authenticationTokenSchema,
+          200: authenticationTokenSchema,
           default: errorSchema,
         },
       },
     },
     async (request, response) => {
       const authToken = await controller.refresh(request.body.refreshToken);
-      response.status(201).send(authToken);
+      response.status(200).send(authToken);
     },
   );
 };

@@ -143,6 +143,9 @@ export class ApiStack extends cdk.Stack {
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
     });
 
+    // リフレッシュトークンのローテション設定は、対応中のステータスのようだ。そのため、下記の PR がマージされるまで手動設定する方針で進める。
+    // https://github.com/aws/aws-cdk/pull/34360
+
     const cognitoClient = new cognito.UserPoolClient(this, "AppClient", {
       userPoolClientName: `fastify-api-templete-user-pool-client`,
       userPool,

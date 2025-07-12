@@ -5,6 +5,9 @@ import {
   AdminInitiateAuthCommandInput,
   AdminInitiateAuthCommandOutput,
   CognitoIdentityProviderClient,
+  GetTokensFromRefreshTokenCommand,
+  GetTokensFromRefreshTokenCommandInput,
+  GetTokensFromRefreshTokenCommandOutput,
 } from "@aws-sdk/client-cognito-identity-provider";
 
 import { CognitoAccessTokenPayload } from "aws-jwt-verify/jwt-model";
@@ -15,7 +18,9 @@ interface ICognitoWrapper {
     password: string,
   ): Promise<AdminInitiateAuthCommandOutput>;
   verifyToken(accessToken: string): Promise<CognitoAccessTokenPayload>;
-  refreshToken(refreshToken: string): Promise<AdminInitiateAuthCommandOutput>;
+  refreshToken(
+    refreshToken: string,
+  ): Promise<GetTokensFromRefreshTokenCommandOutput>;
 }
 
 class CognitoWrapper implements ICognitoWrapper {
@@ -59,16 +64,12 @@ class CognitoWrapper implements ICognitoWrapper {
 
   async refreshToken(
     refreshToken: string,
-  ): Promise<AdminInitiateAuthCommandOutput> {
-    const input: AdminInitiateAuthCommandInput = {
-      AuthFlow: "REFRESH_TOKEN_AUTH",
-      UserPoolId: this.userPoolId,
+  ): Promise<GetTokensFromRefreshTokenCommandOutput> {
+    const input: GetTokensFromRefreshTokenCommandInput = {
+      RefreshToken: refreshToken,
       ClientId: this.clientId,
-      AuthParameters: {
-        REFRESH_TOKEN: refreshToken,
-      },
     };
-    const command = new AdminInitiateAuthCommand(input);
+    const command = new GetTokensFromRefreshTokenCommand(input);
     const result = await this.client.send(command);
     return result;
   }
