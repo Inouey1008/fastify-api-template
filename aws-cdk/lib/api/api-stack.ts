@@ -1,7 +1,9 @@
 import * as cdk from "aws-cdk-lib";
+import { Duration } from "aws-cdk-lib";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 import * as path from "path";
@@ -25,6 +27,7 @@ export class ApiStack extends cdk.Stack {
       {
         functionName: "fastify-api-templete-lambda",
         architecture: lambda.Architecture.ARM_64,
+        timeout: Duration.seconds(60),
         code: lambda.DockerImageCode.fromImageAsset(
           path.resolve(__dirname, "../../.."),
           {
@@ -165,6 +168,12 @@ export class ApiStack extends cdk.Stack {
     lambdaFunction.addEnvironment(
       "COGNITO_CLIENT_ID",
       cognitoClient.userPoolClientId,
+    );
+    lambdaFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["cognito-idp:AdminInitiateAuth"],
+        resources: [userPool.userPoolArn],
+      }),
     );
   }
 }
