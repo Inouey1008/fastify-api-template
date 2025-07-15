@@ -32,6 +32,10 @@ paths:
         発行されたIDトークンは、他の API 呼び出し時に Authorization ヘッダーへ Bearer トークンとして設定する。
 
         IDトークンには有効期限があるため、期限切れの場合は API がエラーを返す。その場合は 新しいIDトークンを再発行して使用する必要がある。
+
+        テストユーザーとして下記のアカウントを使用可能
+        - email: inouey1008+fastify-api-templete@gmail.com
+        - password: hogehoge
       requestBody:
         required: true
         content:
